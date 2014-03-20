@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.Collections;
 
 import static com.jetbrains.lang.dart.util.PubspecYamlUtil.PUBSPEC_YAML;
 
@@ -20,6 +21,14 @@ public class DartConsoleFilter implements Filter {
   private final @NotNull Project myProject;
   private final @Nullable DartSdk mySdk;
   private final @Nullable VirtualFile myPackagesFolder;
+
+  private static final Result EMPTY_RESULT = new Result(Collections.<ResultItem>emptyList()) {
+    @Override
+    public NextAction getNextAction() {
+      return NextAction.CONTINUE_FILTERING;
+    }
+  };
+
 
   public DartConsoleFilter(final Project project) {
     this(project, null);
@@ -34,12 +43,16 @@ public class DartConsoleFilter implements Filter {
   @Nullable
   public Result applyFilter(final String line, final int entireLength) {
     final DartPositionInfo info = DartPositionInfo.parsePositionInfo(line);
-    if (info == null) return null;
+    if (info == null) {
+      return EMPTY_RESULT;
+    }
 
     final VirtualFile file;
     switch (info.type) {
       case FILE:
-        file = LocalFileSystem.getInstance().findFileByPath(info.path);
+        //file = LocalFileSystem.getInstance().findFileByPath(info.path);
+        file = myProject.getBaseDir();
+
         break;
       case DART:
         // todo where to get source for files like "_RawReceivePortImpl._handleMessage (dart:isolate-patch/isolate_patch.dart:93)"?
