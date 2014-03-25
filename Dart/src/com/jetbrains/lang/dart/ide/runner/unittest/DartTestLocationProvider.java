@@ -14,7 +14,6 @@ public class DartTestLocationProvider implements TestLocationProvider {
   @NotNull
   @Override
   public List<Location> getLocation(@NotNull String protocolId, @NotNull String locationData, Project project) {
-    System.out.println(locationData);
     return null;
   }
 }
