@@ -31,17 +31,17 @@ public class DartConsoleFilterTest extends TestCase {
   }
 
   public void testPositionInfo() {
-    //doNegativeTest("");
-    //doNegativeTest(".dart");
-    //doNegativeTest("(.dart)");
-    //doNegativeTest("(dart:foo.dart )");
-    //doNegativeTest("(dart:foo.dart :1:2)");
-    //doNegativeTest("(darts:foo.dart)");
-    //doNegativeTest("(darts:foo.dart)");
-    //doNegativeTest("(dart :foo.dart)");
+    doNegativeTest("");
+    doNegativeTest(".dart");
+    doNegativeTest("(.dart)");
+    doNegativeTest("(darts:foo.dart)");
+    doNegativeTest("(darts:foo.dart)");
+    doNegativeTest("(dart :foo.dart)");
 
-
-    doPositiveTest("a.dart 17:29 main.<fn>.<fn>", Type.FILE, "a.dart", 0, 6, 17, 29);
+    doPositiveTest("a.dart 17:29 main.<fn>.<fn>", Type.FILE, "a.dart", 0, 6, 16, 0);
+    doPositiveTest("a.dart 34:19 runTests.<fn>", Type.FILE, "a.dart", 0, 6, 33, 0);
+    doPositiveTest("package:unittest/src/expect.dart 75:29  expect", Type.PACKAGE, "package:unittest/src/expect.dart", 0, 32, 74, 0);
+    doPositiveTest("dart:isolate                            _RawReceivePortImpl._handleMessage", Type.DART, "dart:isolate", 0, 12, -1, 0);
 
     //doPositiveTest("(dart:.dart)", Type.DART, ".dart", 1, 11, -1, -1);
     //doPositiveTest("x.dart (file://///a.dart:)", Type.FILE, "/a.dart", 8, 24, -1, -1);

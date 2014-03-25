@@ -67,7 +67,7 @@ public class DartPositionInfo {
                                 path,
                                 0,
                                 path.length(),
-                                lineAndColumn.first - 1,
+                                lineAndColumn.first,
                                 0 /* lineAndColumn.second */);
   }
 
@@ -76,7 +76,7 @@ public class DartPositionInfo {
     final String[] index = text.split(":");
     if (index.length == 2) {
       try {
-        return Pair.create(Integer.parseInt(index[0]), Integer.parseInt(index[1]));
+        return Pair.create(Integer.parseInt(index[0]) - 1, Integer.parseInt(index[1]));
       }
       catch (NumberFormatException e) {
         // fall-through
