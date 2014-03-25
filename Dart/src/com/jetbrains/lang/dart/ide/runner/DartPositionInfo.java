@@ -7,6 +7,8 @@ import org.jetbrains.annotations.Nullable;
 
 public class DartPositionInfo {
 
+  private static final String PACKAGE_PREFIX = "package:";
+
   public enum Type {
     FILE, DART, PACKAGE;
 
@@ -41,23 +43,11 @@ public class DartPositionInfo {
   }
 
   /*
-  #0      Object.noSuchMethod (dart:core-patch/object_patch.dart:42)
-  #1      SplayTreeMap.addAll (dart:collection/splay_tree.dart:373)
-  #1      Sphere.copyFrom (package:vector_math/src/vector_math/sphere.dart:46:23)
-  #1      StringBuffer.writeAll (dart:core/string_buffer.dart:41)
-  #2      main (file:///C:/dart/DartSample2/web/Bar.dart:4:28)
-  #3      _startIsolate.isolateStartHandler (dart:isolate-patch/isolate_patch.dart:190)
-  #4      _RawReceivePortImpl._handleMessage (dart:isolate-patch/isolate_patch.dart:93)
-  */
-
-
-  /*
    * package:unittest/src/expect.dart 75:29  expect
    * baz.dart 17:29                          main.<fn>.<fn>
    * baz.dart 34:19                          runTests.<fn>
    * dart:isolate                            _RawReceivePortImpl._handleMessage
    */
-
   @Nullable
   public static DartPositionInfo parsePositionInfo(final @NotNull String text) {
 
@@ -72,24 +62,13 @@ public class DartPositionInfo {
     final String lineAndColumnString = strings[1];
     final Pair<Integer, Integer> lineAndColumn = parseLineAndColumn(lineAndColumnString);
 
-
-    //final char nextChar = text.charAt(pathEndIndex);
-    //if (nextChar != ':' && nextChar != ')') return null;
-    //
-    //final int leftParenIndex = text.substring(0, dotDartIndex).lastIndexOf("(");
-    //final int rightParenIndex = text.indexOf(")", dotDartIndex);
-    //if (leftParenIndex < 0 || rightParenIndex < 0) return null;
-    //
-    //final int colonIndex = text.indexOf(":", leftParenIndex);
-    //if (colonIndex < 0) return null;
-
-
+    // NOTE that column info is elided (with no range, it's not very useful)
     return new DartPositionInfo(type,
                                 path,
                                 0,
                                 path.length(),
-                                lineAndColumn.first,
-                                lineAndColumn.second);
+                                lineAndColumn.first - 1,
+                                0 /* lineAndColumn.second */);
   }
 
   @NotNull
@@ -105,39 +84,14 @@ public class DartPositionInfo {
     }
 
     return Pair.create(-1, -1);
-
-
-    //try {
-    //  int index = 1;
-    //  final int lineTextStartIndex = index;
-    //  while (index < text.length() && Character.isDigit(text.charAt(index))) index++;
-    //
-    //  if (index == lineTextStartIndex) return Pair.create(-1, -1);
-    //  final int line = Integer.parseInt(text.substring(lineTextStartIndex, index));
-    //
-    //  if (index == text.length() || text.charAt(index) != ':') return Pair.create(line, -1);
-    //
-    //  index++;
-    //  final int columnTextStartIndex = index;
-    //  while (index < text.length() && Character.isDigit(text.charAt(index))) index++;
-    //
-    //  if (index == columnTextStartIndex) return Pair.create(line, -1);
-    //  final int column = Integer.parseInt(text.substring(columnTextStartIndex, index));
-    //
-    //  return Pair.create(line, column);
-    //}
-    //catch (NumberFormatException e) {
-    //  return Pair.create(-1, -1);
-    //}
   }
 
-  // trim all leading slashes on windows or all except one on Mac/Linux
-  private static int getPathStartIndex(final @NotNull String text) {
-    if (text.isEmpty() || text.charAt(0) != '/') return 0;
-
-    int index = 0;
-    while (index < text.length() && text.charAt(index) == '/') index++;
-
-    return SystemInfo.isWindows ? index : index - 1;
+  @NotNull
+  private static String relativize(final @NotNull String path) {
+    if (path.startsWith(PACKAGE_PREFIX)) {
+      return path.substring(PACKAGE_PREFIX.length() + 1);
+    }
+    return path;
   }
+
 }

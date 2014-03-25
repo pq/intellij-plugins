@@ -6,6 +6,7 @@ import com.intellij.execution.ExecutionResult;
 import com.intellij.execution.Executor;
 import com.intellij.execution.configurations.CommandLineState;
 import com.intellij.execution.configurations.GeneralCommandLine;
+import com.intellij.execution.filters.Filter;
 import com.intellij.execution.process.OSProcessHandler;
 import com.intellij.execution.process.ProcessHandler;
 import com.intellij.execution.process.ProcessTerminatedListener;
@@ -15,6 +16,7 @@ import com.intellij.execution.testframework.TestConsoleProperties;
 import com.intellij.execution.testframework.autotest.ToggleAutoTestAction;
 import com.intellij.execution.testframework.sm.SMTestRunnerConnectionUtil;
 import com.intellij.execution.testframework.sm.runner.SMTRunnerConsoleProperties;
+import com.intellij.execution.testframework.sm.runner.TestProxyFilterProvider;
 import com.intellij.execution.testframework.sm.runner.ui.SMTRunnerConsoleView;
 import com.intellij.execution.ui.ConsoleView;
 import com.intellij.openapi.diagnostic.Logger;
@@ -28,11 +30,13 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.util.ResourceUtil;
 import com.intellij.util.text.StringTokenizer;
+import com.jetbrains.lang.dart.ide.runner.DartConsoleFilter;
 import com.jetbrains.lang.dart.sdk.DartSdk;
 import com.jetbrains.lang.dart.sdk.DartSdkUtil;
 import com.jetbrains.lang.dart.util.PubspecYamlUtil;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,6 +50,25 @@ public class DartUnitRunningState extends CommandLineState {
   private final DartUnitRunnerParameters myUnitParameters;
   private final DartSdk myDartSdk;
   private int myDebuggingPort;
+
+  private final class DartTestFilterProvider implements TestProxyFilterProvider {
+
+
+    private Project myProject;
+    private final String myTestPath;
+
+    private DartTestFilterProvider(@NotNull final Project project, @NotNull final String testPath) {
+      myProject = project;
+      myTestPath = testPath;
+    }
+
+    @Nullable
+    @Override
+    public Filter getFilter(@NotNull final String nodeType, @NotNull final String nodeName, @Nullable final String nodeArguments) {
+      return new DartConsoleFilter(myProject, myTestPath);
+    }
+  } ;
+
 
   protected DartUnitRunningState(ExecutionEnvironment environment, DartUnitRunnerParameters parameters, DartSdk sdk) {
     this(environment, parameters, sdk, -1);
@@ -80,17 +103,25 @@ public class DartUnitRunningState extends CommandLineState {
       env.getExecutor()
     );
 
+
+    final Project project = env.getProject();
+
+    final DartUnitRunnerParameters parameters =
+      ((DartUnitRunConfiguration)env.getRunnerAndConfigurationSettings().getConfiguration()).getRunnerParameters();
+    final String testFilePath = parameters.getFilePath();
+
+    testConsoleProperties.setUsePredefinedMessageFilter(false);
+
     SMTRunnerConsoleView smtConsoleView = SMTestRunnerConnectionUtil.createConsoleWithCustomLocator(
       DART_FRAMEWORK_NAME,
       testConsoleProperties,
       env,
       new DartTestLocationProvider(),
       true,
-      null
+      new DartTestFilterProvider(project, testFilePath)
     );
-    testConsoleProperties.setUsePredefinedMessageFilter(false);
 
-    final Project project = env.getProject();
+
     Disposer.register(project, smtConsoleView);
     return smtConsoleView;
   }
@@ -167,7 +198,8 @@ public class DartUnitRunningState extends CommandLineState {
     runnerCode = runnerCode.replaceFirst("DART_UNITTEST", "package:unittest/unittest.dart");
     runnerCode = runnerCode.replaceFirst("NAME", StringUtil.notNullize(name));
     runnerCode = runnerCode.replaceFirst("SCOPE", scope.toString());
-    runnerCode = runnerCode.replaceFirst("TEST_FILE_PATH", pathToDartUrl(myUnitParameters.getFilePath()));
+    runnerCode = runnerCode.replaceFirst("TEST_FILE_URL", pathToDartUrl(myUnitParameters.getFilePath()));
+    runnerCode = runnerCode.replaceFirst("TEST_FILE_PATH", myUnitParameters.getFilePath());
 
     FileUtil.writeToFile(file, runnerCode);
 

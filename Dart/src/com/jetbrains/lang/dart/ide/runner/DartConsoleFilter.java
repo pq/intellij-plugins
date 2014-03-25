@@ -21,38 +21,36 @@ public class DartConsoleFilter implements Filter {
   private final @NotNull Project myProject;
   private final @Nullable DartSdk mySdk;
   private final @Nullable VirtualFile myPackagesFolder;
-
-  private static final Result EMPTY_RESULT = new Result(Collections.<ResultItem>emptyList()) {
-    @Override
-    public NextAction getNextAction() {
-      return NextAction.CONTINUE_FILTERING;
-    }
-  };
-
+  private final @NotNull String myTestPath;
 
   public DartConsoleFilter(final Project project) {
     this(project, null);
   }
 
-  public DartConsoleFilter(final @NotNull Project project, final @Nullable VirtualFile packagesFolder) {
+  public DartConsoleFilter(final Project project, String testPath) {
+    this(project, null, testPath);
+  }
+
+  public DartConsoleFilter(final @NotNull Project project, final @Nullable VirtualFile packagesFolder, final @NotNull String testPath) {
     myProject = project;
     mySdk = DartSdk.getGlobalDartSdk();
     myPackagesFolder = packagesFolder;
+    myTestPath = testPath;
   }
 
   @Nullable
   public Result applyFilter(final String line, final int entireLength) {
+
     final DartPositionInfo info = DartPositionInfo.parsePositionInfo(line);
     if (info == null) {
-      return EMPTY_RESULT;
+      return null;
     }
 
-    final VirtualFile file;
+    VirtualFile file = null;
     switch (info.type) {
       case FILE:
         //file = LocalFileSystem.getInstance().findFileByPath(info.path);
-        file = myProject.getBaseDir();
-
+        file = myProject.getProjectFile().getFileSystem().findFileByPath(myTestPath);
         break;
       case DART:
         // todo where to get source for files like "_RawReceivePortImpl._handleMessage (dart:isolate-patch/isolate_patch.dart:93)"?
@@ -64,11 +62,12 @@ public class DartConsoleFilter implements Filter {
         }
         break;
       case PACKAGE:
+        final String relativePath = relativize(info.path);
         if (myPackagesFolder != null) {
-          file = myPackagesFolder.findFileByRelativePath(info.path);
+          file = myPackagesFolder.findFileByRelativePath(relativePath);
         }
         else {
-          file = findFileInPackagesFolder(myProject, info.path);
+          file = findFileInPackagesFolder(myProject, relativePath);
         }
         break;
       default:
@@ -83,6 +82,15 @@ public class DartConsoleFilter implements Filter {
 
     return null;
   }
+
+  @NotNull
+  private static String relativize(final @NotNull String path) {
+    if (path.startsWith("package:")) {
+      return path.substring(8);
+    }
+    return path;
+  }
+
 
   @Nullable
   private static VirtualFile findFileInPackagesFolder(final Project project, final String relativePath) {
