@@ -19,6 +19,8 @@ public class DartSyntaxHighlighterColors {
   public static final String DART_PARAMETER = "DART_PARAMETER";
   public static final String DART_LABEL = "DART_LABEL";
   public static final String DART_METADATA = "DART_METADATA";
+  public static final String DART_CONSTRUCTOR_CALL = "DART_CONSTRUCTOR_CALL";
+  public static final String DART_CONSTRUCTOR_DECLARATION = "DART_CONSTRUCTOR_DECLARATION";
 
   private static final String DART_LINE_COMMENT = "DART_LINE_COMMENT";
   private static final String DART_BLOCK_COMMENT = "DART_BLOCK_COMMENT";
@@ -36,6 +38,7 @@ public class DartSyntaxHighlighterColors {
   private static final String DART_DOT = "DART_DOT";
   private static final String DART_SEMICOLON = "DART_SEMICOLON";
   private static final String DART_BAD_CHARACTER = "DART_BAD_CHARACTER";
+  
 
   public static final TextAttributesKey LINE_COMMENT =
     createTextAttributesKey(DART_LINE_COMMENT, DefaultLanguageHighlighterColors.LINE_COMMENT);
@@ -89,4 +92,8 @@ public class DartSyntaxHighlighterColors {
     createTextAttributesKey(DART_LABEL, DefaultLanguageHighlighterColors.LABEL);
   public static final TextAttributesKey METADATA =
     createTextAttributesKey(DART_METADATA, DefaultLanguageHighlighterColors.METADATA);
+  public static final TextAttributesKey CONSTRUCTOR_CALL =
+    createTextAttributesKey(DART_CONSTRUCTOR_CALL, DefaultLanguageHighlighterColors.FUNCTION_CALL);
+  public static final TextAttributesKey CONSTRUCTOR_DECLARATION =
+    createTextAttributesKey(DART_CONSTRUCTOR_DECLARATION, DefaultLanguageHighlighterColors.FUNCTION_DECLARATION);
 }

@@ -49,7 +49,9 @@ public class DartColorsAndFontsPage implements ColorSettingsPage {
       new AttributesDescriptor(DartBundle.message("dart.color.settings.description.instance.member.function"), INSTANCE_MEMBER_FUNCTION),
       new AttributesDescriptor(DartBundle.message("dart.color.settings.description.static.member.function"), STATIC_MEMBER_FUNCTION),
       new AttributesDescriptor(DartBundle.message("dart.color.settings.description.instance.member.variable"), INSTANCE_MEMBER_VARIABLE),
-      new AttributesDescriptor(DartBundle.message("dart.color.settings.description.static.member.variable"), STATIC_MEMBER_VARIABLE)
+      new AttributesDescriptor(DartBundle.message("dart.color.settings.description.static.member.variable"), STATIC_MEMBER_VARIABLE),
+      new AttributesDescriptor(DartBundle.message("dart.color.settings.description.constructor.call"), CONSTRUCTOR_CALL),
+      new AttributesDescriptor(DartBundle.message("dart.color.settings.description.constructor.decl"), CONSTRUCTOR_DECLARATION),
     };
 
     ourTags.put("parameter", PARAMETER);
@@ -65,6 +67,8 @@ public class DartColorsAndFontsPage implements ColorSettingsPage {
     ourTags.put("static.member.variable", STATIC_MEMBER_VARIABLE);
     ourTags.put("escape", VALID_STRING_ESCAPE);
     ourTags.put("bad.escape", INVALID_STRING_ESCAPE);
+    ourTags.put("constructor.call", CONSTRUCTOR_CALL);
+    ourTags.put("constructor.decl", CONSTRUCTOR_DECLARATION);
   }
 
   @NotNull
@@ -106,11 +110,13 @@ public class DartColorsAndFontsPage implements ColorSettingsPage {
            "\n" +
            "  static <static.member.function>staticFunction</static.member.function>() {\n" +
            "    <label>label</label>: <static.member.variable>staticField</static.member.variable>++; /* block comment */\n" +
-           "  }\n" +
+           "  }\n\n" +
+           "  <constructor.decl>SomeClass</constructor.decl>(this.someString);\n" +
            "\n" +
            "  <instance.member.function>foo</instance.member.function>(<builtin>dynamic</builtin> <parameter>param</parameter>) {\n" +
            "    print(<instance.member.variable>someString</instance.member.variable> + <parameter>param</parameter>);\n" +
            "    var <local.variable>localVar</local.variable> = <class>SomeClass</class>.<static.member.variable>staticField</static.member.variable>; \n" +
+           "    var <local.variable>localVar2</local.variable> = new <constructor.call>SomeClass</constructor.call>('content');\n" +
            "    <local.variable>localVar</local.variable>++; \n" +
            "    <function>localFunction</function>() {\n" +
            "      <local.variable>localVar</local.variable> = ```; // bad character\n" +
