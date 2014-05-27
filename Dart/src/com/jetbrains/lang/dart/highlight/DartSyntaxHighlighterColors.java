@@ -12,7 +12,9 @@ public class DartSyntaxHighlighterColors {
   public static final String DART_BUILTIN = "DART_BUILTIN";
   public static final String DART_FUNCTION = "DART_FUNCTION";
   public static final String DART_STATIC_MEMBER_FUNCTION = "DART_STATIC_MEMBER_FUNCTION";
+  public static final String DART_STATIC_MEMBER_FUNCTION_CALL = "DART_STATIC_MEMBER_FUNCTION_CALL";
   public static final String DART_INSTANCE_MEMBER_FUNCTION = "DART_INSTANCE_MEMBER_FUNCTION";
+  public static final String DART_INSTANCE_MEMBER_FUNCTION_CALL = "DART_INSTANCE_MEMBER_FUNCTION_CALL";
   public static final String DART_INSTANCE_MEMBER_VARIABLE = "DART_INSTANCE_MEMBER_VARIABLE";
   public static final String DART_STATIC_MEMBER_VARIABLE = "DART_STATIC_MEMBER_VARIABLE";
   public static final String DART_LOCAL_VARIABLE = "DART_LOCAL_VARIABLE";
@@ -21,6 +23,10 @@ public class DartSyntaxHighlighterColors {
   public static final String DART_METADATA = "DART_METADATA";
   public static final String DART_CONSTRUCTOR_CALL = "DART_CONSTRUCTOR_CALL";
   public static final String DART_CONSTRUCTOR_DECLARATION = "DART_CONSTRUCTOR_DECLARATION";
+  public static final String DART_TOP_LEVEL_FUNCTION_DECLARATION = "DART_TOP_LEVEL_FUNCTION_DECLARATION";
+  public static final String DART_TOP_LEVEL_FUNCTION_CALL = "DART_TOP_LEVEL_FUNCTION_CALL";
+  public static final String DART_TOP_LEVEL_VARIABLE_DECLARATION = "DART_TOP_LEVEL_VARIABLE_DECLARATION";
+  public static final String DART_TOP_LEVEL_VARIABLE_ACCESS = "DART_TOP_LEVEL_VARIABLE_ACCESS";
 
   private static final String DART_LINE_COMMENT = "DART_LINE_COMMENT";
   private static final String DART_BLOCK_COMMENT = "DART_BLOCK_COMMENT";
@@ -76,8 +82,12 @@ public class DartSyntaxHighlighterColors {
     createTextAttributesKey(DART_CLASS, DefaultLanguageHighlighterColors.CLASS_NAME);
   public static final TextAttributesKey STATIC_MEMBER_FUNCTION =
     createTextAttributesKey(DART_STATIC_MEMBER_FUNCTION, DefaultLanguageHighlighterColors.STATIC_METHOD);
+  public static final TextAttributesKey STATIC_MEMBER_FUNCTION_CALL =
+    createTextAttributesKey(DART_STATIC_MEMBER_FUNCTION_CALL, DefaultLanguageHighlighterColors.FUNCTION_CALL);
   public static final TextAttributesKey INSTANCE_MEMBER_FUNCTION =
     createTextAttributesKey(DART_INSTANCE_MEMBER_FUNCTION, DefaultLanguageHighlighterColors.INSTANCE_METHOD);
+  public static final TextAttributesKey INSTANCE_MEMBER_FUNCTION_CALL =
+    createTextAttributesKey(DART_INSTANCE_MEMBER_FUNCTION_CALL, DefaultLanguageHighlighterColors.FUNCTION_CALL);
   public static final TextAttributesKey INSTANCE_MEMBER_VARIABLE =
     createTextAttributesKey(DART_INSTANCE_MEMBER_VARIABLE, DefaultLanguageHighlighterColors.INSTANCE_FIELD);
   public static final TextAttributesKey STATIC_MEMBER_VARIABLE =
@@ -96,4 +106,12 @@ public class DartSyntaxHighlighterColors {
     createTextAttributesKey(DART_CONSTRUCTOR_CALL, DefaultLanguageHighlighterColors.FUNCTION_CALL);
   public static final TextAttributesKey CONSTRUCTOR_DECLARATION =
     createTextAttributesKey(DART_CONSTRUCTOR_DECLARATION, DefaultLanguageHighlighterColors.FUNCTION_DECLARATION);
+  public static final TextAttributesKey TOP_LEVEL_FUNCTION_DECLARATION =
+    createTextAttributesKey(DART_TOP_LEVEL_FUNCTION_DECLARATION, DefaultLanguageHighlighterColors.FUNCTION_DECLARATION);
+  public static final TextAttributesKey TOP_LEVEL_FUNCTION_CALL =
+    createTextAttributesKey(DART_TOP_LEVEL_FUNCTION_CALL, DefaultLanguageHighlighterColors.FUNCTION_CALL);
+  public static final TextAttributesKey TOP_LEVEL_VARIABLE_DECLARATION =
+    createTextAttributesKey(DART_TOP_LEVEL_VARIABLE_DECLARATION, DefaultLanguageHighlighterColors.GLOBAL_VARIABLE);
+  public static final TextAttributesKey TOP_LEVEL_VARIABLE_ACCESS =
+    createTextAttributesKey(DART_TOP_LEVEL_VARIABLE_ACCESS, DefaultLanguageHighlighterColors.GLOBAL_VARIABLE);
 }
