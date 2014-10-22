@@ -107,6 +107,11 @@ public class DartAnalyzerService {
     });
   }
 
+
+  public AnalysisContext getContextReference() {
+    return SoftReference.dereference(myAnalysisContextRef);
+  }
+
   @NotNull
   public static DartAnalyzerService getInstance(final @NotNull Project project) {
     return ServiceManager.getService(project, DartAnalyzerService.class);
