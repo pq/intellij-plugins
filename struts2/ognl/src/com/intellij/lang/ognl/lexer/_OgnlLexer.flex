@@ -16,6 +16,8 @@ import com.intellij.lang.ognl.OgnlTypes;
   public _OgnlLexer(){
     this((java.io.Reader)null);
   }
+
+  int braceCount;
 %}
 
 %unicode
@@ -30,7 +32,7 @@ ALPHA=[:letter:]
 DIGIT=[0-9]
 WHITE_SPACE_CHAR=[\ \n\r\t\f]
 
-IDENTIFIER=[:jletter:] [:jletterdigit:]*
+IDENTIFIER={ALPHA} [:jletterdigit:]*
 
 INTEGER_LITERAL=(0|([1-9]({DIGIT})*))
 BIG_INTEGER_LITERAL=({INTEGER_LITERAL})(["h""H"]?)
@@ -47,15 +49,15 @@ STRING_LITERAL=\"([^\\\"\r\n]|{ESCAPE_SEQUENCE})*(\"|\\)?
 
 ESCAPE_SEQUENCE=\\[^\r\n]
 
-%state SEQUENCE_EXPRESSION
+%state NESTED_BRACE
 
 %%
 
 <YYINITIAL> "%{"      { return OgnlTypes.EXPRESSION_START; }
 <YYINITIAL> "}"       { return OgnlTypes.EXPRESSION_END; }
 
-"{"                   { yybegin(SEQUENCE_EXPRESSION); return OgnlTypes.LBRACE; }
-<SEQUENCE_EXPRESSION> "}"   { yybegin(YYINITIAL); return OgnlTypes.RBRACE; }
+"{"                   { if (++braceCount > 0)  yybegin(NESTED_BRACE); return OgnlTypes.LBRACE; }
+<NESTED_BRACE> "}"    { if (--braceCount == 0) yybegin(YYINITIAL); return OgnlTypes.RBRACE; }
 
 {WHITE_SPACE_CHAR}+   { return TokenType.WHITE_SPACE; }
 

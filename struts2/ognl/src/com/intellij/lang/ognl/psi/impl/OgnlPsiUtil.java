@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 The authors
+ * Copyright 2014 The authors
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -47,6 +47,13 @@ class OgnlPsiUtil {
     return (OgnlTokenType)node.getElementType();
   }
 
+  @NotNull
+  static String getVariableName(OgnlVariableAssignmentExpression expression) {
+    final ASTNode nameNode = expression.getNode().findChildByType(OgnlTypes.IDENTIFIER);
+    assert nameNode != null;
+    return nameNode.getText();
+  }
+
   @Nullable
   static PsiType getType(@Nullable OgnlExpression expression) {
     if (expression == null) {
@@ -62,11 +69,6 @@ class OgnlPsiUtil {
       return getType(thenExpression);
     }
 
-    if (expression instanceof OgnlIndexedExpression) {
-      OgnlExpression indexExpression = ((OgnlIndexedExpression)expression).getIndexExpression();
-      return getType(indexExpression);
-    }
-
     if (expression instanceof OgnlBinaryExpression) {
       OgnlExpression leftExpression = ((OgnlBinaryExpression)expression).getLeft();
       return getType(leftExpression);
@@ -75,6 +77,11 @@ class OgnlPsiUtil {
     if (expression instanceof OgnlVariableAssignmentExpression) {
       OgnlExpression assignment = ((OgnlVariableAssignmentExpression)expression).getAssignment();
       return getType(assignment);
+    }
+
+    if (expression instanceof OgnlParenthesizedExpression) {
+      OgnlExpression argument = ((OgnlParenthesizedExpression)expression).getExpression();
+      return getType(argument);
     }
 
     return null;
@@ -150,7 +157,7 @@ class OgnlPsiUtil {
     throw new IllegalArgumentException("could not resolve constant value for literal " + type + " / " + text);
   }
 
-  static int getParameterCount(OgnlMethodCallExpression expression) {
-    return expression.getExpressionList().size() - 1;
+  static int getParameterCount(OgnlParameterList parameterList) {
+    return parameterList.getParametersList().size();
   }
 }

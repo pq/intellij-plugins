@@ -106,7 +106,7 @@ public class PhoneGapConfigurable implements Configurable {
   @Nullable
   @Override
   public String getHelpTopic() {
-    return "settings.phonegap";
+    return "settings.javascript.phonegap.cordova";
   }
 
   @Nullable
@@ -129,6 +129,8 @@ public class PhoneGapConfigurable implements Configurable {
       myWrapper = new JPanel(new BorderLayout());
       myWrapper.add(panel, BorderLayout.NORTH);
       setUpListeners();
+      phoneGapPluginsView
+        .setupService(myExecutablePath.getText(), myWorkingDirectory.getText(), myRepositoryStore, getVersionCallback());
     }
 
     return myWrapper;

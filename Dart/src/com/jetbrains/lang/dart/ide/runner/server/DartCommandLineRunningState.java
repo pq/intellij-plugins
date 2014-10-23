@@ -1,23 +1,33 @@
 package com.jetbrains.lang.dart.ide.runner.server;
 
 import com.intellij.execution.ExecutionException;
+import com.intellij.execution.Executor;
 import com.intellij.execution.configurations.CommandLineState;
 import com.intellij.execution.configurations.CommandLineTokenizer;
 import com.intellij.execution.configurations.GeneralCommandLine;
 import com.intellij.execution.configurations.RuntimeConfigurationError;
+import com.intellij.execution.executors.DefaultDebugExecutor;
 import com.intellij.execution.filters.TextConsoleBuilder;
 import com.intellij.execution.filters.TextConsoleBuilderImpl;
 import com.intellij.execution.process.OSProcessHandler;
 import com.intellij.execution.process.ProcessHandler;
 import com.intellij.execution.process.ProcessTerminatedListener;
 import com.intellij.execution.runners.ExecutionEnvironment;
+import com.intellij.execution.ui.ConsoleView;
+import com.intellij.openapi.actionSystem.AnAction;
+import com.intellij.openapi.actionSystem.Separator;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Computable;
+import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.util.net.NetUtils;
 import com.jetbrains.lang.dart.DartBundle;
 import com.jetbrains.lang.dart.ide.runner.DartConsoleFilter;
+import com.jetbrains.lang.dart.ide.runner.DartRelativePathsConsoleFilter;
 import com.jetbrains.lang.dart.ide.runner.base.DartRunConfigurationBase;
 import com.jetbrains.lang.dart.ide.runner.client.DartiumUtil;
+import com.jetbrains.lang.dart.pubServer.PubServerManager;
 import com.jetbrains.lang.dart.sdk.DartSdk;
 import com.jetbrains.lang.dart.sdk.DartSdkUtil;
 import com.jetbrains.lang.dart.util.DartUrlResolver;
@@ -29,6 +39,7 @@ import java.util.StringTokenizer;
 public class DartCommandLineRunningState extends CommandLineState {
   protected final @NotNull DartCommandLineRunnerParameters myRunnerParameters;
   private int myDebuggingPort = -1;
+  private int myObservatoryPort = -1;
 
   public DartCommandLineRunningState(final @NotNull ExecutionEnvironment env) throws ExecutionException {
     super(env);
@@ -48,14 +59,35 @@ public class DartCommandLineRunningState extends CommandLineState {
 
     try {
       builder.addFilter(new DartConsoleFilter(env.getProject(), myRunnerParameters.getDartFile()));
+
+      // unit tests can be run as normal Dart apps, so add DartUnitConsoleFilter as well
+      final String workingDir = StringUtil.isEmptyOrSpaces(myRunnerParameters.getWorkingDirectory())
+                                ? myRunnerParameters.getDartFile().getParent().getPath()
+                                : myRunnerParameters.getWorkingDirectory();
+      builder.addFilter(new DartRelativePathsConsoleFilter(env.getProject(), workingDir));
     }
     catch (RuntimeConfigurationError e) {
       builder.addFilter(new DartConsoleFilter(env.getProject(), null)); // can't happen because already checked
     }
   }
 
-  public void setDebuggingPort(final int debuggingPort) {
-    myDebuggingPort = debuggingPort;
+  @Override
+  protected AnAction[] createActions(final ConsoleView console, final ProcessHandler processHandler, final Executor executor) {
+    // These action is effectively added only to the Run tool window. For Debug see DartCommandLineDebugProcess.registerAdditionalActions()
+    final AnAction[] actions = super.createActions(console, processHandler, executor);
+    final AnAction[] newActions = new AnAction[actions.length + 2];
+    System.arraycopy(actions, 0, newActions, 0, actions.length);
+
+    newActions[newActions.length - 2] = new Separator();
+
+    newActions[newActions.length - 1] = new OpenDartObservatoryUrlAction(myObservatoryPort, new Computable<Boolean>() {
+      @Override
+      public Boolean compute() {
+        return !processHandler.isProcessTerminated();
+      }
+    });
+
+    return newActions;
   }
 
   @NotNull
@@ -91,21 +123,19 @@ public class DartCommandLineRunningState extends CommandLineState {
                               ? dartFile.getParent().getPath()
                               : myRunnerParameters.getWorkingDirectory();
 
-    final GeneralCommandLine commandLine = new GeneralCommandLine();
-    commandLine.setExePath(dartExePath);
-    commandLine.setWorkDirectory(workingDir);
+    final GeneralCommandLine commandLine = new GeneralCommandLine().withWorkDirectory(workingDir);
+    commandLine.setExePath(FileUtil.toSystemDependentName(dartExePath));
     commandLine.getEnvironment().putAll(myRunnerParameters.getEnvs());
     commandLine.setPassParentEnvironment(myRunnerParameters.isIncludeParentEnvs());
-    setupParameters(getEnvironment().getProject(), commandLine, myRunnerParameters, myDebuggingPort, overriddenMainFilePath);
+    setupParameters(getEnvironment().getProject(), commandLine, myRunnerParameters, overriddenMainFilePath);
 
     return commandLine;
   }
 
-  private static void setupParameters(final @NotNull Project project,
-                                      final @NotNull GeneralCommandLine commandLine,
-                                      final @NotNull DartCommandLineRunnerParameters runnerParameters,
-                                      final int debuggingPort,
-                                      final @Nullable String overriddenMainFilePath) throws ExecutionException {
+  private void setupParameters(final @NotNull Project project,
+                               final @NotNull GeneralCommandLine commandLine,
+                               final @NotNull DartCommandLineRunnerParameters runnerParameters,
+                               final @Nullable String overriddenMainFilePath) throws ExecutionException {
     commandLine.addParameter("--ignore-unrecognized-flags");
 
     final String vmOptions = runnerParameters.getVMOptions();
@@ -131,14 +161,20 @@ public class DartCommandLineRunningState extends CommandLineState {
     final VirtualFile[] packageRoots = DartUrlResolver.getInstance(project, dartFile).getPackageRoots();
     if (packageRoots.length > 0) {
       // more than one package root is not supported by the [SDK]/bin/dart tool
-      commandLine.addParameter("--package-root=" + packageRoots[0].getPath());
+      commandLine.addParameter("--package-root=" + FileUtil.toSystemDependentName(packageRoots[0].getPath()));
     }
 
-    if (debuggingPort > 0) {
-      commandLine.addParameter("--debug:" + debuggingPort);
+    if (DefaultDebugExecutor.EXECUTOR_ID.equals(getEnvironment().getExecutor().getId())) {
+      myDebuggingPort = NetUtils.tryToFindAvailableSocketPort();
+      commandLine.addParameter("--debug:" + myDebuggingPort);
+      commandLine.addParameter("--break-at-isolate-spawn");
     }
 
-    commandLine.addParameter(overriddenMainFilePath == null ? dartFile.getPath() : overriddenMainFilePath);
+    myObservatoryPort = PubServerManager.findOneMoreAvailablePort(myDebuggingPort);
+    commandLine.addParameter("--enable-vm-service:" + myObservatoryPort);
+    commandLine.addParameter("--trace_service_pause_events");
+
+    commandLine.addParameter(FileUtil.toSystemDependentName(overriddenMainFilePath == null ? dartFile.getPath() : overriddenMainFilePath));
 
     final String arguments = runnerParameters.getArguments();
     if (arguments != null) {
@@ -147,5 +183,13 @@ public class DartCommandLineRunningState extends CommandLineState {
         commandLine.addParameter(argumentsTokenizer.nextToken());
       }
     }
+  }
+
+  public int getDebuggingPort() {
+    return myDebuggingPort;
+  }
+
+  public int getObservatoryPort() {
+    return myObservatoryPort;
   }
 }

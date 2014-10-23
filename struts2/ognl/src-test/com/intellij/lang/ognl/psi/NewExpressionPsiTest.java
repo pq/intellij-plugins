@@ -30,29 +30,28 @@ public class NewExpressionPsiTest extends PsiTestCase {
   }
 
   public void testQualifiedClassnameWithNoParameters() {
-    assertConstructorExpression("new java.util.ArrayList()", "java.util.ArrayList");
+    final OgnlNewExpression newExpression = assertConstructorExpression("new java.util.ArrayList()", "java.util.ArrayList");
+
+    assertNotNull(newExpression.getParameterList());
   }
 
   public void testClassnameWithOneParameter() {
-    assertConstructorExpression("new Integer(1)", "Integer");
+    final OgnlNewExpression newExpression = assertConstructorExpression("new Integer(1)", "Integer");
+
+    final OgnlParameterList parameterList = newExpression.getParameterList();
+    assertNotNull(parameterList);
+    assertSize(1, parameterList.getParametersList());
+    assertEquals(1, parameterList.getParameterCount());
   }
 
   public void testClassnameWithMultipleParameters() {
     assertConstructorExpression("new Something(1, 2)", "Something");
   }
 
-  public void testIntArrayEmpty() {
-    assertConstructorExpression("new int[0]", "int");
-  }
-
-  public void testIntArrayWithSequence() {
-    assertConstructorExpression("new int[] {1, 2}", "int");
-  }
-
   private OgnlNewExpression assertConstructorExpression(
     @Language(value = OgnlLanguage.ID,
-              prefix = OgnlLanguage.EXPRESSION_PREFIX,
-              suffix = OgnlLanguage.EXPRESSION_SUFFIX)
+      prefix = OgnlLanguage.EXPRESSION_PREFIX,
+      suffix = OgnlLanguage.EXPRESSION_SUFFIX)
     final String expression,
     final String objectTypeText) {
     final OgnlNewExpression newExpression = parse(expression);
@@ -65,8 +64,8 @@ public class NewExpressionPsiTest extends PsiTestCase {
   }
 
   private OgnlNewExpression parse(@Language(value = OgnlLanguage.ID,
-                                            prefix = OgnlLanguage.EXPRESSION_PREFIX,
-                                            suffix = OgnlLanguage.EXPRESSION_SUFFIX) final String expression) {
+    prefix = OgnlLanguage.EXPRESSION_PREFIX,
+    suffix = OgnlLanguage.EXPRESSION_SUFFIX) final String expression) {
     return (OgnlNewExpression)parseSingleExpression(expression);
   }
 }

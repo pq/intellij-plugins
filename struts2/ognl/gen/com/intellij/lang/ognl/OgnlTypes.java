@@ -29,13 +29,18 @@ public interface OgnlTypes {
   IElementType CONDITIONAL_EXPRESSION = new OgnlTokenType("CONDITIONAL_EXPRESSION");
   IElementType EXPRESSION = new OgnlTokenType("EXPRESSION");
   IElementType INDEXED_EXPRESSION = new OgnlTokenType("INDEXED_EXPRESSION");
+  IElementType LAMBDA_EXPRESSION = new OgnlTokenType("LAMBDA_EXPRESSION");
   IElementType LITERAL_EXPRESSION = new OgnlTokenType("LITERAL_EXPRESSION");
   IElementType MAP_ENTRY_ELEMENT = new OgnlTokenType("MAP_ENTRY_ELEMENT");
   IElementType MAP_EXPRESSION = new OgnlTokenType("MAP_EXPRESSION");
   IElementType METHOD_CALL_EXPRESSION = new OgnlTokenType("METHOD_CALL_EXPRESSION");
+  IElementType NEW_ARRAY_EXPRESSION = new OgnlTokenType("NEW_ARRAY_EXPRESSION");
   IElementType NEW_EXPRESSION = new OgnlTokenType("NEW_EXPRESSION");
+  IElementType PARAMETER_LIST = new OgnlTokenType("PARAMETER_LIST");
   IElementType PARENTHESIZED_EXPRESSION = new OgnlTokenType("PARENTHESIZED_EXPRESSION");
+  IElementType PROJECTION_EXPRESSION = new OgnlTokenType("PROJECTION_EXPRESSION");
   IElementType REFERENCE_EXPRESSION = new OgnlTokenType("REFERENCE_EXPRESSION");
+  IElementType SELECTION_EXPRESSION = new OgnlTokenType("SELECTION_EXPRESSION");
   IElementType SEQUENCE_EXPRESSION = new OgnlTokenType("SEQUENCE_EXPRESSION");
   IElementType UNARY_EXPRESSION = new OgnlTokenType("UNARY_EXPRESSION");
   IElementType VARIABLE_ASSIGNMENT_EXPRESSION = new OgnlTokenType("VARIABLE_ASSIGNMENT_EXPRESSION");
@@ -123,6 +128,9 @@ public interface OgnlTypes {
       else if (type == INDEXED_EXPRESSION) {
         return new OgnlIndexedExpressionImpl(node);
       }
+      else if (type == LAMBDA_EXPRESSION) {
+        return new OgnlLambdaExpressionImpl(node);
+      }
       else if (type == LITERAL_EXPRESSION) {
         return new OgnlLiteralExpressionImpl(node);
       }
@@ -135,14 +143,26 @@ public interface OgnlTypes {
       else if (type == METHOD_CALL_EXPRESSION) {
         return new OgnlMethodCallExpressionImpl(node);
       }
+      else if (type == NEW_ARRAY_EXPRESSION) {
+        return new OgnlNewArrayExpressionImpl(node);
+      }
       else if (type == NEW_EXPRESSION) {
         return new OgnlNewExpressionImpl(node);
+      }
+      else if (type == PARAMETER_LIST) {
+        return new OgnlParameterListImpl(node);
       }
       else if (type == PARENTHESIZED_EXPRESSION) {
         return new OgnlParenthesizedExpressionImpl(node);
       }
+      else if (type == PROJECTION_EXPRESSION) {
+        return new OgnlProjectionExpressionImpl(node);
+      }
       else if (type == REFERENCE_EXPRESSION) {
         return new OgnlReferenceExpressionImpl(node);
+      }
+      else if (type == SELECTION_EXPRESSION) {
+        return new OgnlSelectionExpressionImpl(node);
       }
       else if (type == SEQUENCE_EXPRESSION) {
         return new OgnlSequenceExpressionImpl(node);

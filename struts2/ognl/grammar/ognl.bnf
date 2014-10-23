@@ -114,12 +114,14 @@ root ::= EXPRESSION_START rootElement EXPRESSION_END { pin=1 }
 private rootRecover ::= !(EXPRESSION_END)
 private rootElement ::= expression {recoverWhile="rootRecover"}
 
-expression ::= mapExpression |
+expression ::= lambdaExpression |
+               mapExpression |
                sequenceExpression |
                parenthesizedExpression |
                variableAssignmentExpression |
                conditionalExpression |
                binaryExpression |
+               newArrayExpression |
                newExpression |
                methodCallExpression |
                indexedExpression |
@@ -145,7 +147,24 @@ literalExpression ::= numberLiteralExpression |
   ]
 }
 
-referenceExpression ::= (variableExpression | ('@')? IDENTIFIER) ('.' IDENTIFIER)* ('@' IDENTIFIER)? {
+projectionExpression ::= '{' expression '}'
+{
+  methods=[
+    projectionExpression="expression"
+  ]
+}
+selectionExpression ::= '{' ('?' | '^' | '$') expression '}'
+{
+  methods=[
+    selectorExpression="expression"
+  ]
+}
+
+referenceExpression ::= (variableExpression | ('@')? IDENTIFIER)
+                        ('.' IDENTIFIER)* ('@' IDENTIFIER)?
+                        ('.'  selectionExpression)?
+                        ('.'  projectionExpression )?
+{
   mixin="com.intellij.lang.ognl.psi.impl.OgnlReferenceExpressionBase"
 }
 
@@ -154,24 +173,37 @@ variableExpression ::= '#' IDENTIFIER {
 }
 
 variableAssignmentExpression ::= '#' IDENTIFIER '=' expression {
-  methods=[assignment="expression"]
+  methods=[
+    getVariableName
+    assignment="expression"
+  ]
   pin=3
 }
 
-private methodCallParameters ::= expression? (',' expression)*
-methodCallExpression ::= referenceExpression '(' methodCallParameters ')'  {
+parameterList ::= expression? (',' expression)* {
   methods=[
-    method="expression[0]"
+    parameters="expression"
     getParameterCount
+  ]
+}
+methodCallExpression ::= referenceExpression '(' parameterList ')'  {
+  methods=[
+    method="expression"
   ]
   pin(".*")="'\('"
 }
 
 private expressionSequenceRequired ::= expression (',' expression)+  { pin(".*")=1 }
-sequenceExpression ::= '{' expressionSequenceRequired '}' { pin=1 }
+sequenceExpression ::= '{' expressionSequenceRequired '}' {
+  methods=[
+    elements="expression"
+  ]
+  pin=1
+}
 
 mapEntryElement ::= expression ':' expression {
   methods=[
+    expression=""
     keyExpression="expression[0]"
     valueExpression="expression[1]"
   ]
@@ -186,8 +218,14 @@ mapExpression ::= ('#{' | '#@' fqnTypeExpression '@{') mapExpressionSequence '}'
   pin=1
 }
 
+lambdaExpression ::= ':' '[' expression "]" {
+  pin=1
+}
+
 indexedExpression ::= (referenceExpression | variableExpression) '[' expression ']' {
   methods=[
+    expression=""
+    referenceQualifier="expression[0]"
     indexExpression="expression[1]"
   ]
   pin=2
@@ -223,6 +261,7 @@ private binaryOperations ::=
                            { name="operator" }
 binaryExpression ::= expression binaryOperations expression {
   methods=[
+    expression=""
     left="expression[0]"
     right="expression[1]"
     getOperator
@@ -241,19 +280,28 @@ unaryExpression ::= unaryOperator expression {
 private conditionalExpressionTail ::= ':' expression {pin=1}
 conditionalExpression ::= expression '?' expression conditionalExpressionTail {
   methods=[
+    expression=""
     condition="expression[0]"
     then="expression[1]"
     else="expression[2]"
   ]
 }
 
-private arrayConstructorExpression ::= '[' expression? ']' sequenceExpression? {pin=1}
-private constructorExpression ::= '(' methodCallParameters ')' {pin=1}
-newExpression ::= "new" fqnTypeExpression (arrayConstructorExpression | constructorExpression) {
+private constructorExpression ::= '(' parameterList ')' {pin=1}
+newExpression ::= "new" fqnTypeExpression constructorExpression {
   methods=[
-    objectType="expression[0]"
+    objectType="expression"
   ]
   pin=1
+}
+
+private arrayConstructorExpression ::= '[' expression? ']' sequenceExpression? {pin=1}
+newArrayExpression ::= "new" fqnTypeExpression arrayConstructorExpression {
+  methods=[
+    expression=""
+    objectType="expression[0]"
+    constructorExpression="expression[1]"
+  ]
 }
 
 
@@ -263,11 +311,3 @@ fqnTypeExpression ::= IDENTIFIER ('.' IDENTIFIER)* {
   name="FQN type"
   elementType="expression" // todo own PSI/resolve etc.
 }
-
-// TODO:
-// projection/selection: e1.{e2} / e1.{?e2}
-// sub-expression: e1.(e2)
-// chained sub-expression: headline.parent.(ensureLoaded(), name)
-// list creation: { e, ... } --> already via sequence?
-// array creation: new array-component-class[] { e, ... }
-// lambda: :[ e ]

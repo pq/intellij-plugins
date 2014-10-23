@@ -1,15 +1,16 @@
 package org.angularjs.editor;
 
+import com.intellij.json.JsonLanguage;
 import com.intellij.lang.injection.MultiHostInjector;
 import com.intellij.lang.injection.MultiHostRegistrar;
 import com.intellij.lang.javascript.JSTargetedInjector;
-import com.intellij.lang.javascript.json.JSONLanguageDialect;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiLanguageInjectionHost;
 import com.intellij.psi.impl.source.xml.XmlAttributeValueImpl;
 import com.intellij.psi.impl.source.xml.XmlTextImpl;
+import com.intellij.psi.templateLanguages.OuterLanguageElement;
 import com.intellij.psi.xml.XmlAttribute;
 import com.intellij.psi.xml.XmlTokenType;
 import org.angularjs.codeInsight.attributes.AngularAttributesRegistry;
@@ -43,7 +44,7 @@ public class AngularJSInjector implements MultiHostInjector, JSTargetedInjector 
         return;
       }
       if (AngularAttributesRegistry.isJSONAttribute((XmlAttribute)parent) && length > 1) {
-        registrar.startInjecting(JSONLanguageDialect.JSON).
+        registrar.startInjecting(JsonLanguage.INSTANCE).
           addPlace(null, null, (PsiLanguageInjectionHost)context, new TextRange(start, length - end)).
           doneInjecting();
         return;
@@ -65,7 +66,8 @@ public class AngularJSInjector implements MultiHostInjector, JSTargetedInjector 
         endIndex = startIndex >= 0 ? text.indexOf(end, afterStart) : -1;
         endIndex = endIndex > 0 ? endIndex : text.length() - 1;
         final PsiElement injectionCandidate = startIndex >= 0 ? context.findElementAt(startIndex) : null;
-        if (injectionCandidate != null && injectionCandidate.getNode().getElementType() != XmlTokenType.XML_COMMENT_CHARACTERS) {
+        if (injectionCandidate != null && injectionCandidate.getNode().getElementType() != XmlTokenType.XML_COMMENT_CHARACTERS &&
+           !(injectionCandidate instanceof OuterLanguageElement)) {
           registrar.startInjecting(AngularJSLanguage.INSTANCE).
                     addPlace(null, null, (PsiLanguageInjectionHost)context, new TextRange(afterStart, endIndex)).
                     doneInjecting();

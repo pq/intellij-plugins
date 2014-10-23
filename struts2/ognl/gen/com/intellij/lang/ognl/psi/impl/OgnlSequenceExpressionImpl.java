@@ -39,7 +39,7 @@ public class OgnlSequenceExpressionImpl extends OgnlExpressionImpl implements Og
 
   @Override
   @NotNull
-  public List<OgnlExpression> getExpressionList() {
+  public List<OgnlExpression> getElementsList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, OgnlExpression.class);
   }
 

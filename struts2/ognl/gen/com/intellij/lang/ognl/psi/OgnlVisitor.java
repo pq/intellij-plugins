@@ -38,6 +38,10 @@ public class OgnlVisitor extends PsiElementVisitor {
     visitExpression(o);
   }
 
+  public void visitLambdaExpression(@NotNull OgnlLambdaExpression o) {
+    visitExpression(o);
+  }
+
   public void visitLiteralExpression(@NotNull OgnlLiteralExpression o) {
     visitExpression(o);
   }
@@ -54,15 +58,31 @@ public class OgnlVisitor extends PsiElementVisitor {
     visitExpression(o);
   }
 
+  public void visitNewArrayExpression(@NotNull OgnlNewArrayExpression o) {
+    visitExpression(o);
+  }
+
   public void visitNewExpression(@NotNull OgnlNewExpression o) {
     visitExpression(o);
+  }
+
+  public void visitParameterList(@NotNull OgnlParameterList o) {
+    visitPsiCompositeElement(o);
   }
 
   public void visitParenthesizedExpression(@NotNull OgnlParenthesizedExpression o) {
     visitExpression(o);
   }
 
+  public void visitProjectionExpression(@NotNull OgnlProjectionExpression o) {
+    visitExpression(o);
+  }
+
   public void visitReferenceExpression(@NotNull OgnlReferenceExpression o) {
+    visitExpression(o);
+  }
+
+  public void visitSelectionExpression(@NotNull OgnlSelectionExpression o) {
     visitExpression(o);
   }
 

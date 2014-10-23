@@ -38,9 +38,9 @@ public class OgnlReferenceExpressionImpl extends OgnlReferenceExpressionBase imp
   }
 
   @Override
-  @Nullable
-  public OgnlVariableExpression getVariableExpression() {
-    return findChildByClass(OgnlVariableExpression.class);
+  @NotNull
+  public List<OgnlExpression> getExpressionList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, OgnlExpression.class);
   }
 
 }

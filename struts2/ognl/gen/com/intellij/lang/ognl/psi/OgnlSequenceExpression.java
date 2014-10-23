@@ -24,6 +24,6 @@ import com.intellij.psi.PsiElement;
 public interface OgnlSequenceExpression extends OgnlExpression {
 
   @NotNull
-  List<OgnlExpression> getExpressionList();
+  List<OgnlExpression> getElementsList();
 
 }

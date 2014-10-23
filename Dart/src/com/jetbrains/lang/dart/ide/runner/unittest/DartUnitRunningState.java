@@ -24,6 +24,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.ResourceUtil;
 import com.jetbrains.lang.dart.DartBundle;
 import com.jetbrains.lang.dart.ide.runner.DartConsoleFilter;
+import com.jetbrains.lang.dart.ide.runner.DartRelativePathsConsoleFilter;
 import com.jetbrains.lang.dart.ide.runner.server.DartCommandLineRunningState;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
@@ -47,7 +48,8 @@ public class DartUnitRunningState extends DartCommandLineRunningState {
     final ConsoleView consoleView = createConsole(getEnvironment());
     consoleView.attachToProcess(processHandler);
 
-    final DefaultExecutionResult executionResult = new DefaultExecutionResult(consoleView, processHandler);
+    final DefaultExecutionResult executionResult =
+      new DefaultExecutionResult(consoleView, processHandler, createActions(consoleView, processHandler, executor));
     executionResult.setRestartActions(new ToggleAutoTestAction(getEnvironment()));
     return executionResult;
   }
@@ -71,7 +73,7 @@ public class DartUnitRunningState extends DartCommandLineRunningState {
       final String workingDir = StringUtil.isEmptyOrSpaces(runnerParameters.getWorkingDirectory())
                                 ? dartFile.getParent().getPath()
                                 : runnerParameters.getWorkingDirectory();
-      smtConsoleView.addMessageFilter(new DartUnitConsoleFilter(project, workingDir));
+      smtConsoleView.addMessageFilter(new DartRelativePathsConsoleFilter(project, workingDir));
     }
     catch (RuntimeConfigurationError ignore) {/**/}
 

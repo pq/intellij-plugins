@@ -13,8 +13,8 @@ import com.intellij.openapi.module.Module;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.io.FileUtil;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.containers.ContainerUtil;
 import icons.PhoneGapIcons;
@@ -59,18 +59,21 @@ public class PhoneGapProjectTemplateGenerator extends WebProjectTemplate<PhoneGa
             PhoneGapCommandLine commandLine = new PhoneGapCommandLine(settings.getExecutable(), tempProject.getPath());
 
             if (!commandLine.isCorrectExecutable()) {
-              showErrorMessage(project, "Incorrect path");
+              showErrorMessage("Incorrect path");
               return;
             }
             commandLine.createNewProject(settings.name());
 
             File[] array = tempProject.listFiles();
-            assert array != null && array.length != 0;
-            File from = ContainerUtil.getFirstItem(ContainerUtil.newArrayList(array));
-            assert from != null;
-            FileUtil.copyDir(from, new File(baseDir.getPath()));
-
-            deleteTemp(tempProject);
+            if (array != null && array.length != 0) {
+              File from = ContainerUtil.getFirstItem(ContainerUtil.newArrayList(array));
+              assert from != null;
+              FileUtil.copyDir(from, new File(baseDir.getPath()));
+              deleteTemp(tempProject);
+            }
+            else {
+              showErrorMessage("Cannot find files in the directory " + tempProject.getAbsolutePath());
+            }
           }
           catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
@@ -83,13 +86,17 @@ public class PhoneGapProjectTemplateGenerator extends WebProjectTemplate<PhoneGa
         public void run() {
           PropertiesComponent propertiesComponent = PropertiesComponent.getInstance(project);
           propertiesComponent.setValue(PhoneGapSettings.PHONEGAP_WORK_DIRECTORY, project.getBasePath());
+          PhoneGapSettings.State state = PhoneGapSettings.getInstance().getState();
+          if (!StringUtil.equals(settings.getExecutable(), state.getExecutablePath())) {
+            PhoneGapSettings.getInstance().loadState(new PhoneGapSettings.State(settings.executable, state.repositoriesList));
+          }
           baseDir.refresh(false, true);
         }
       });
     }
     catch (Exception e) {
       LOG.warn(e);
-      showErrorMessage(project, e.getMessage());
+      showErrorMessage(e.getMessage());
     }
   }
 
@@ -135,10 +142,9 @@ public class PhoneGapProjectTemplateGenerator extends WebProjectTemplate<PhoneGa
     }
   }
 
-  private static void showErrorMessage(@NotNull Project project, @NotNull String message) {
+  private static void showErrorMessage(@NotNull String message) {
     String fullMessage = "Error creating PhoneGap/Cordova App. " + message;
     String title = "Create PhoneGap/Cordova Project";
-    Messages.showErrorDialog(project, fullMessage, title);
     Notifications.Bus.notify(
       new Notification("PhoneGap/Cordova Generator", title, fullMessage, NotificationType.ERROR)
     );

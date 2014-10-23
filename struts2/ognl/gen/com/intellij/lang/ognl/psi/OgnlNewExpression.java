@@ -23,8 +23,8 @@ import com.intellij.psi.PsiElement;
 
 public interface OgnlNewExpression extends OgnlExpression {
 
-  @NotNull
-  List<OgnlExpression> getExpressionList();
+  @Nullable
+  OgnlParameterList getParameterList();
 
   @Nullable
   OgnlExpression getObjectType();

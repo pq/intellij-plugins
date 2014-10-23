@@ -126,8 +126,8 @@ class DartUrlResolverImpl extends DartUrlResolver {
       return LocalFileSystem.getInstance().findFileByPath(SystemInfo.isWindows ? path : ("/" + path));
     }
 
-    if (ApplicationManager.getApplication().isUnitTestMode() && url.startsWith(TEMP_PREFIX_WITH_SLASHES)) {
-      return TempFileSystem.getInstance().findFileByPath(url.substring((TEMP_PREFIX_WITH_SLASHES).length()));
+    if (ApplicationManager.getApplication().isUnitTestMode() && url.startsWith(TEMP_PREFIX)) {
+      return TempFileSystem.getInstance().findFileByPath(url.substring((TEMP_PREFIX).length()));
     }
 
     return null;
@@ -237,17 +237,6 @@ class DartUrlResolverImpl extends DartUrlResolver {
     }
 
     return pubspecYamlFile;
-  }
-
-  private static VirtualFile findPubspecYamlFile(final @NotNull Project project, final @NotNull VirtualFile contextFile) {
-    final ProjectFileIndex fileIndex = ProjectRootManager.getInstance(project).getFileIndex();
-    VirtualFile parent = contextFile;
-    while ((parent = parent.getParent()) != null && fileIndex.isInContent(parent)) {
-      final VirtualFile file = parent.findChild(PUBSPEC_YAML);
-      if (file != null && !file.isDirectory()) return file;
-    }
-
-    return null;
   }
 
   private void initLivePackageNameToDirMap() {
