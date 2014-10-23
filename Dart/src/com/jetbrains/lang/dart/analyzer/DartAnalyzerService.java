@@ -133,8 +133,8 @@ public class DartAnalyzerService {
     });
   }
 
-
-  public AnalysisContext getContextReference() {
+  public AnalysisContext createFreshContext() {
+    // A HACK --- rather than reaching in for the cached reference, we want a fresh context
     return SoftReference.dereference(myAnalysisContextRef);
   }
 

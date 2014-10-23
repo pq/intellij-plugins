@@ -245,8 +245,7 @@ public class PubListPackageDirsAction extends AnAction {
     final LibraryEx.ModifiableModelEx libModel = (LibraryEx.ModifiableModelEx)library.getModifiableModel();
     try {
 
-
-      AnalysisContext context = DartAnalyzerService.getInstance(project).getContextReference();
+      AnalysisContext context = DartAnalyzerService.getInstance(project).createFreshContext();
       Set<String> folders = new LibraryDependencyCollector((InternalAnalysisContext)context).collectFolderDependencies();
 
       for (String url : libModel.getUrls(OrderRootType.CLASSES)) {
