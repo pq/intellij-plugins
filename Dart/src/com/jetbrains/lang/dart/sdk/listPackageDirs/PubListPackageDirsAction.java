@@ -35,6 +35,7 @@ import com.jetbrains.lang.dart.util.PubspecYamlUtil;
 import gnu.trove.THashSet;
 import icons.DartIcons;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.util.*;
@@ -58,14 +59,17 @@ public class PubListPackageDirsAction extends AnAction {
       return myDependencies;
     }
 
-    private String getFolderName(String fullPath) {
+    private String getFolderName(@Nullable String fullPath) {
       if (fullPath == null) {
         return null;
       }
       return fullPath.substring(0, Math.max(0, fullPath.lastIndexOf(File.separator)));
     }
 
-    private void addDependencies(LibraryElement libraryElement) {
+    private void addDependencies(@Nullable LibraryElement libraryElement) {
+      if (libraryElement == null) {
+        return;
+      }
       if (myVisitedLibraries.add(libraryElement)) {
         for (CompilationUnitElement cu : libraryElement.getUnits()) {
           myDependencies.add(getFolderName(cu.getSource().getFullName()));
