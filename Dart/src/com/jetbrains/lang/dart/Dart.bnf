@@ -81,6 +81,8 @@
   NATIVE="native"
   SHOW="show"
   HIDE="hide"
+  AWAIT="await"
+  YIELD="yield"
 
   LBRACE="{"
   RBRACE="}"
@@ -412,7 +414,7 @@ private not_paren_recover ::= !')'
 
 whileStatement ::= 'while' '(' expressionWithRecoverUntilParen ')' statement {pin=1}
 doWhileStatement ::= 'do' statement 'while' '(' expressionWithRecoverUntilParen ')' ';' {pin=1}
-forStatement ::= 'for' forLoopPartsInBraces statement {pin=1}
+forStatement ::= 'await'? 'for' forLoopPartsInBraces statement {pin=2}
 //todo component
 assertStatement ::= 'assert' '(' expressionWithRecoverUntilParen ')' ';' {pin=1}
 breakStatement ::= 'break' referenceExpression? ';' {pin=1}
@@ -511,7 +513,7 @@ private multiplicativeExpressionWrapper ::= prefixExpression multiplicativeExpre
 left multiplicativeExpression ::= multiplicativeOperator prefixExpression
 {mixin="com.jetbrains.lang.dart.psi.impl.DartOperatorExpressionImpl" implements="com.jetbrains.lang.dart.psi.DartReference"}
 
-prefixExpression ::= (prefixOperator prefixExpression) | suffixExpressionWrapper
+prefixExpression ::= (prefixOperator prefixExpression) | suffixExpressionWrapper | ('await' prefixExpression)
 {mixin="com.jetbrains.lang.dart.psi.impl.DartOperatorExpressionImpl" implements="com.jetbrains.lang.dart.psi.DartReference"}
 prefixOperator ::= '-' | '+' | '--' | '++' | '!' | '~' | '?'
 
@@ -597,9 +599,11 @@ functionDeclarationWithBodyOrNative ::= metadata* 'external'? (returnType compon
 functionDeclarationWithBody ::= metadata*  (returnType componentName formalParameterList | componentName formalParameterList) functionBody // todo merge with functionDeclarationWithBodyOrNative
 {mixin="com.jetbrains.lang.dart.psi.impl.AbstractDartComponentImpl" implements="com.jetbrains.lang.dart.psi.DartComponent"}
 
-functionBody ::= arrowBodyWithSemi | block
+functionBody ::= arrowBodyWithSemi | blockBody
 private arrowBodyWithSemi ::= arrowBody ';' {pin=1}
 
-functionExpressionBody ::= arrowBody | block
-private arrowBody ::= '=>' (expression | throwStatement) {pin=1}
+functionExpressionBody ::= arrowBody | blockBody
+private arrowBody ::= ('async' '*'? | 'sync' '*')?  '=>' (expression | throwStatement) {pin=2}
+
+private blockBody ::=  ('async' '*'? | 'sync' '*')? block
 

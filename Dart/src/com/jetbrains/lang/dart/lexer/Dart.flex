@@ -186,6 +186,8 @@ HEX_NUMBER = 0 [Xx] {HEX_DIGIT}*
 <YYINITIAL, LONG_TEMPLATE_ENTRY> "native"               { return NATIVE; }
 <YYINITIAL, LONG_TEMPLATE_ENTRY> "show"                 { return SHOW; }
 <YYINITIAL, LONG_TEMPLATE_ENTRY> "hide"                 { return HIDE; }
+<YYINITIAL, LONG_TEMPLATE_ENTRY> "await"                { return AWAIT; }
+<YYINITIAL, LONG_TEMPLATE_ENTRY> "yield"                { return YIELD; }
 
 <YYINITIAL, LONG_TEMPLATE_ENTRY> {IDENTIFIER}           { return IDENTIFIER; }
 <YYINITIAL, LONG_TEMPLATE_ENTRY> "["                { return LBRACKET; }

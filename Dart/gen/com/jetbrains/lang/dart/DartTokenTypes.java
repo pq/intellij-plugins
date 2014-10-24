@@ -142,6 +142,7 @@ public interface DartTokenTypes {
   IElementType AS = new DartElementType("as");
   IElementType ASSERT = new DartElementType("assert");
   IElementType AT = new DartElementType("@");
+  IElementType AWAIT = new DartElementType("await");
   IElementType BIN_NOT = new DartElementType("~");
   IElementType BREAK = new DartElementType("break");
   IElementType CASE = new DartElementType("case");
@@ -246,6 +247,7 @@ public interface DartTokenTypes {
   IElementType WITH = new DartElementType("with");
   IElementType XOR = new DartElementType("^");
   IElementType XOR_EQ = new DartElementType("^=");
+  IElementType YIELD = new DartElementType("yield");
 
   class Factory {
     public static PsiElement createElement(ASTNode node) {

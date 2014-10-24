@@ -617,23 +617,70 @@ public class DartParser implements PsiParser {
   }
 
   /* ********************************************************** */
-  // '=>' (expression | throwStatement)
+  // ('async' '*'? | 'sync' '*')?  '=>' (expression | throwStatement)
   static boolean arrowBody(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "arrowBody")) return false;
-    if (!nextTokenIs(builder_, EXPRESSION_BODY_DEF)) return false;
     boolean result_;
     boolean pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
-    result_ = consumeToken(builder_, EXPRESSION_BODY_DEF);
-    pinned_ = result_; // pin = 1
-    result_ = result_ && arrowBody_1(builder_, level_ + 1);
+    result_ = arrowBody_0(builder_, level_ + 1);
+    result_ = result_ && consumeToken(builder_, EXPRESSION_BODY_DEF);
+    pinned_ = result_; // pin = 2
+    result_ = result_ && arrowBody_2(builder_, level_ + 1);
     exit_section_(builder_, level_, marker_, null, result_, pinned_, null);
     return result_ || pinned_;
   }
 
+  // ('async' '*'? | 'sync' '*')?
+  private static boolean arrowBody_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "arrowBody_0")) return false;
+    arrowBody_0_0(builder_, level_ + 1);
+    return true;
+  }
+
+  // 'async' '*'? | 'sync' '*'
+  private static boolean arrowBody_0_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "arrowBody_0_0")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = arrowBody_0_0_0(builder_, level_ + 1);
+    if (!result_) result_ = arrowBody_0_0_1(builder_, level_ + 1);
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
+  }
+
+  // 'async' '*'?
+  private static boolean arrowBody_0_0_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "arrowBody_0_0_0")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = consumeToken(builder_, "async");
+    result_ = result_ && arrowBody_0_0_0_1(builder_, level_ + 1);
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
+  }
+
+  // '*'?
+  private static boolean arrowBody_0_0_0_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "arrowBody_0_0_0_1")) return false;
+    consumeToken(builder_, MUL);
+    return true;
+  }
+
+  // 'sync' '*'
+  private static boolean arrowBody_0_0_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "arrowBody_0_0_1")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = consumeToken(builder_, "sync");
+    result_ = result_ && consumeToken(builder_, MUL);
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
+  }
+
   // expression | throwStatement
-  private static boolean arrowBody_1(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "arrowBody_1")) return false;
+  private static boolean arrowBody_2(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "arrowBody_2")) return false;
     boolean result_;
     Marker marker_ = enter_section_(builder_);
     result_ = expression(builder_, level_ + 1);
@@ -646,7 +693,6 @@ public class DartParser implements PsiParser {
   // arrowBody ';'
   static boolean arrowBodyWithSemi(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "arrowBodyWithSemi")) return false;
-    if (!nextTokenIs(builder_, EXPRESSION_BODY_DEF)) return false;
     boolean result_;
     boolean pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
@@ -843,6 +889,65 @@ public class DartParser implements PsiParser {
     result_ = pinned_ && consumeToken(builder_, RBRACE) && result_;
     exit_section_(builder_, level_, marker_, BLOCK, result_, pinned_, null);
     return result_ || pinned_;
+  }
+
+  /* ********************************************************** */
+  // ('async' '*'? | 'sync' '*')? block
+  static boolean blockBody(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "blockBody")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = blockBody_0(builder_, level_ + 1);
+    result_ = result_ && block(builder_, level_ + 1);
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
+  }
+
+  // ('async' '*'? | 'sync' '*')?
+  private static boolean blockBody_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "blockBody_0")) return false;
+    blockBody_0_0(builder_, level_ + 1);
+    return true;
+  }
+
+  // 'async' '*'? | 'sync' '*'
+  private static boolean blockBody_0_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "blockBody_0_0")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = blockBody_0_0_0(builder_, level_ + 1);
+    if (!result_) result_ = blockBody_0_0_1(builder_, level_ + 1);
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
+  }
+
+  // 'async' '*'?
+  private static boolean blockBody_0_0_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "blockBody_0_0_0")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = consumeToken(builder_, "async");
+    result_ = result_ && blockBody_0_0_0_1(builder_, level_ + 1);
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
+  }
+
+  // '*'?
+  private static boolean blockBody_0_0_0_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "blockBody_0_0_0_1")) return false;
+    consumeToken(builder_, MUL);
+    return true;
+  }
+
+  // 'sync' '*'
+  private static boolean blockBody_0_0_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "blockBody_0_0_1")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = consumeToken(builder_, "sync");
+    result_ = result_ && consumeToken(builder_, MUL);
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
   }
 
   /* ********************************************************** */
@@ -1783,8 +1888,6 @@ public class DartParser implements PsiParser {
   // varFactoryDeclaration ';' | functionBodyOrNative | ';'
   static boolean factoryTail(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "factoryTail")) return false;
-    if (!nextTokenIs(builder_, "", SEMICOLON, EQ,
-      EXPRESSION_BODY_DEF, NATIVE, LBRACE)) return false;
     boolean result_;
     Marker marker_ = enter_section_(builder_);
     result_ = factoryTail_0(builder_, level_ + 1);
@@ -2167,19 +2270,27 @@ public class DartParser implements PsiParser {
   }
 
   /* ********************************************************** */
-  // 'for' forLoopPartsInBraces statement
+  // 'await'? 'for' forLoopPartsInBraces statement
   public static boolean forStatement(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "forStatement")) return false;
-    if (!nextTokenIs(builder_, FOR)) return false;
+    if (!nextTokenIs(builder_, "<for statement>", AWAIT, FOR)) return false;
     boolean result_;
     boolean pinned_;
-    Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
-    result_ = consumeToken(builder_, FOR);
-    pinned_ = result_; // pin = 1
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, "<for statement>");
+    result_ = forStatement_0(builder_, level_ + 1);
+    result_ = result_ && consumeToken(builder_, FOR);
+    pinned_ = result_; // pin = 2
     result_ = result_ && report_error_(builder_, forLoopPartsInBraces(builder_, level_ + 1));
     result_ = pinned_ && statement(builder_, level_ + 1) && result_;
     exit_section_(builder_, level_, marker_, FOR_STATEMENT, result_, pinned_, null);
     return result_ || pinned_;
+  }
+
+  // 'await'?
+  private static boolean forStatement_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "forStatement_0")) return false;
+    consumeToken(builder_, AWAIT);
+    return true;
   }
 
   /* ********************************************************** */
@@ -2282,14 +2393,13 @@ public class DartParser implements PsiParser {
   }
 
   /* ********************************************************** */
-  // arrowBodyWithSemi | block
+  // arrowBodyWithSemi | blockBody
   public static boolean functionBody(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "functionBody")) return false;
-    if (!nextTokenIs(builder_, "<function body>", EXPRESSION_BODY_DEF, LBRACE)) return false;
     boolean result_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, "<function body>");
     result_ = arrowBodyWithSemi(builder_, level_ + 1);
-    if (!result_) result_ = block(builder_, level_ + 1);
+    if (!result_) result_ = blockBody(builder_, level_ + 1);
     exit_section_(builder_, level_, marker_, FUNCTION_BODY, result_, false, null);
     return result_;
   }
@@ -2300,7 +2410,6 @@ public class DartParser implements PsiParser {
   //                                | functionBody
   static boolean functionBodyOrNative(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "functionBodyOrNative")) return false;
-    if (!nextTokenIs(builder_, "", EXPRESSION_BODY_DEF, NATIVE, LBRACE)) return false;
     boolean result_;
     Marker marker_ = enter_section_(builder_);
     result_ = functionBodyOrNative_0(builder_, level_ + 1);
@@ -2507,14 +2616,13 @@ public class DartParser implements PsiParser {
   }
 
   /* ********************************************************** */
-  // arrowBody | block
+  // arrowBody | blockBody
   public static boolean functionExpressionBody(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "functionExpressionBody")) return false;
-    if (!nextTokenIs(builder_, "<function expression body>", EXPRESSION_BODY_DEF, LBRACE)) return false;
     boolean result_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, "<function expression body>");
     result_ = arrowBody(builder_, level_ + 1);
-    if (!result_) result_ = block(builder_, level_ + 1);
+    if (!result_) result_ = blockBody(builder_, level_ + 1);
     exit_section_(builder_, level_, marker_, FUNCTION_EXPRESSION_BODY, result_, false, null);
     return result_;
   }
@@ -4356,13 +4464,14 @@ public class DartParser implements PsiParser {
   }
 
   /* ********************************************************** */
-  // (prefixOperator prefixExpression) | suffixExpressionWrapper
+  // (prefixOperator prefixExpression) | suffixExpressionWrapper | ('await' prefixExpression)
   public static boolean prefixExpression(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "prefixExpression")) return false;
     boolean result_;
     Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, "<prefix expression>");
     result_ = prefixExpression_0(builder_, level_ + 1);
     if (!result_) result_ = suffixExpressionWrapper(builder_, level_ + 1);
+    if (!result_) result_ = prefixExpression_2(builder_, level_ + 1);
     exit_section_(builder_, level_, marker_, PREFIX_EXPRESSION, result_, false, null);
     return result_;
   }
@@ -4373,6 +4482,17 @@ public class DartParser implements PsiParser {
     boolean result_;
     Marker marker_ = enter_section_(builder_);
     result_ = prefixOperator(builder_, level_ + 1);
+    result_ = result_ && prefixExpression(builder_, level_ + 1);
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
+  }
+
+  // 'await' prefixExpression
+  private static boolean prefixExpression_2(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "prefixExpression_2")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = consumeToken(builder_, AWAIT);
     result_ = result_ && prefixExpression(builder_, level_ + 1);
     exit_section_(builder_, marker_, null, result_);
     return result_;
