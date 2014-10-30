@@ -7,13 +7,4 @@ import com.intellij.psi.PsiElement;
 
 public interface DartFunctionExpressionBody extends DartPsiCompositeElement {
 
-  @Nullable
-  DartBlock getBlock();
-
-  @Nullable
-  DartExpression getExpression();
-
-  @Nullable
-  DartThrowStatement getThrowStatement();
-
 }

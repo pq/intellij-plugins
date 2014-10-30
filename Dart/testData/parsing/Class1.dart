@@ -34,3 +34,24 @@ class GettersSetters {
   get get get{}   // not valid, but should be parsed
   set set set(){} // not valid, but should be parsed
 }
+
+foo1() sync => 1;
+void foo2() sync* => throw a;
+int foo3() async => new X();
+Future<T<Y>> foo4() async* => y();
+foo5() sync {
+  sync{}
+  bar() sync{}
+}
+void foo6() sync* {
+  bar() sync*{}
+  sync*{}
+}
+int foo7() async {
+  async{}
+  bar() async{}
+}
+Future<T<Y>> foo8() async* {
+  bar() async*{}
+  async*{};
+}
