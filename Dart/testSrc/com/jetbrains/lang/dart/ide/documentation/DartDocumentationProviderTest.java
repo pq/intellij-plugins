@@ -1,28 +1,31 @@
 package com.jetbrains.lang.dart.ide.documentation;
 
-import com.intellij.testFramework.LightPlatformTestCase;
+import com.intellij.psi.PsiFile;
+import com.intellij.psi.util.PsiTreeUtil;
+import com.jetbrains.lang.dart.DartCodeInsightFixtureTestCase;
+import com.jetbrains.lang.dart.psi.DartComponent;
 
-public class DartDocumentationProviderTest extends LightPlatformTestCase {
+public class DartDocumentationProviderTest extends DartCodeInsightFixtureTestCase {
 
-  public void testSdkPrefixes() throws Exception {
-    assertLibPrefixEquals("dart.core", "http://api.dartlang.org/docs/releases/latest/dart_core");
-    assertLibPrefixEquals("dart.io", "http://api.dartlang.org/docs/releases/latest/dart_io");
-    assertLibPrefixEquals("dart.math", "http://api.dartlang.org/docs/releases/latest/dart_math");
+
+  private static final DartDocumentationProvider myProvider = new DartDocumentationProvider();
+
+  private void doTest(String expectedDoc, String fileContents) throws Exception {
+    final int caretOffset = fileContents.indexOf("<caret>");
+    assertTrue(caretOffset != -1);
+    final String realContents = fileContents.substring(0, caretOffset) + fileContents.substring(caretOffset + "<caret>".length());
+    final PsiFile psiFile = myFixture.addFileToProject("test.dart", realContents);
+
+    final DartComponent dartComponent = PsiTreeUtil.getParentOfType(psiFile.findElementAt(caretOffset), DartComponent.class);
+    assertNotNull("target element not found at offset " + caretOffset, dartComponent);
+
+
+    assertEquals(expectedDoc, myProvider.getUrlFor(dartComponent, dartComponent));
   }
 
-  public void testDomLibPrefixes() throws Exception {
-    assertLibPrefixEquals("dart.dom.html", "http://api.dartlang.org/docs/releases/latest/dart_html");
-    assertLibPrefixEquals("dart.dom.svg", "http://api.dartlang.org/docs/releases/latest/dart_svg");
-    assertLibPrefixEquals("dart.webgl", "http://api.dartlang.org/docs/releases/latest/dart_webgl");
-  }
-
-  public void testApiDocHostedLibPrefixes() throws Exception {
-    assertLibPrefixEquals("barback", "http://api.dartlang.org/docs/releases/latest/barback");
-    assertLibPrefixEquals("unittest", "http://api.dartlang.org/docs/releases/latest/unittest");
-  }
-
-  private void assertLibPrefixEquals(final String libName, final String expectedPrefix) {
-    assertEquals(expectedPrefix, DartDocumentationProvider.constructDocUrlPrefix(libName).toString());
+  public void testObjectClass() throws Exception {
+    doTest("http://api.dartlang.org/docs/releases/latest/dart_core/Object.html",
+           "<caret>Object o;\n");
   }
 
 }
