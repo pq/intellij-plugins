@@ -37,6 +37,10 @@
         <XML>
           <option name="XML_LEGACY_SETTINGS_IMPORTED" value="true" />
         </XML>
+        <codeStyleSettings language="ECMA Script Level 4">
+          <option name="LINE_COMMENT_AT_FIRST_COLUMN" value="false" />
+          <option name="PARENT_SETTINGS_INSTALLED" value="true" />
+        </codeStyleSettings>
         <codeStyleSettings language="Groovy">
           <option name="KEEP_BLANK_LINES_BEFORE_RBRACE" value="0" />
           <option name="ELSE_ON_NEW_LINE" value="true" />
