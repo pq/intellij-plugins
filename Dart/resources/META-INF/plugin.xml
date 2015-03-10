@@ -192,6 +192,9 @@
     <localInspection bundle="com.jetbrains.lang.dart.DartBundle" key="dart.sdk.is.not.configured"
                      groupName="Dart" enabledByDefault="true" level="WARNING"
                      implementationClass="com.jetbrains.lang.dart.ide.inspections.DartSdkIsNotConfiguredInspection"/>
+    <localInspection bundle="com.jetbrains.lang.dart.DartBundle" key="dart.sdk.is.out.of.date"
+                     groupName="Dart" enabledByDefault="true" level="INFO"
+                     implementationClass="com.jetbrains.lang.dart.ide.inspections.DartSdkIsOutOfDateInspection"/>
     <localInspection language="Dart" bundle="com.jetbrains.lang.dart.DartBundle" key="dart.deprecated.api.usage"
                      groupName="Dart" enabledByDefault="true" level="WEAK WARNING"
                      implementationClass="com.jetbrains.lang.dart.ide.inspections.DartDeprecatedApiUsageInspection"/>
