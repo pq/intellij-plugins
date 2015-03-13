@@ -15,6 +15,7 @@ import com.intellij.openapi.util.io.FileUtilRt;
 import com.intellij.ui.DocumentAdapter;
 import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBLabel;
+import com.intellij.util.io.HttpRequests;
 import com.jetbrains.lang.dart.DartBundle;
 import com.jetbrains.lang.dart.ide.runner.client.DartiumUtil;
 import org.jetbrains.annotations.Contract;
@@ -27,8 +28,8 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.*;
-import java.net.URL;
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -88,8 +89,9 @@ public class DartSdkUtil {
       if (currentRevision != null) {
         try {
 
-          final String versionFileContents = readUrlStream(myUpdateCheckUrl);
+          final String versionFileContents = HttpRequests.request(myUpdateCheckUrl).readString(null);
           final String availableRevision = parseRevisionNumberFromJSON(versionFileContents);
+
           if (availableRevision != null) {
             int current = Integer.parseInt(currentRevision);
             int available = Integer.parseInt(availableRevision);
@@ -108,7 +110,6 @@ public class DartSdkUtil {
     }
 
   }
-
 
   public static class SdkUpdateInfo {
     private final String myRevision;
@@ -251,38 +252,6 @@ public class DartSdkUtil {
 
   public static String getPubPath(final @NotNull String sdkRoot) {
     return sdkRoot + (SystemInfo.isWindows ? "/bin/pub.bat" : "/bin/pub");
-  }
-
-  @NotNull
-  private static String readUrlStream(String urlString) throws IOException {
-    URL url = new URL(urlString);
-    InputStream stream = url.openStream();
-    return toString(stream);
-  }
-
-  @NotNull
-  private static String toString(InputStream is) throws IOException {
-    final char[] buffer = new char[0x10000];
-    StringBuilder out = new StringBuilder();
-
-    Reader in = null;
-    try {
-      in = new InputStreamReader(is, "UTF-8");
-      int read;
-      do {
-        read = in.read(buffer, 0, buffer.length);
-        if (read > 0) {
-          out.append(buffer, 0, read);
-        }
-      }
-      while (read >= 0);
-    }
-    finally {
-      if (in != null) {
-        in.close();
-      }
-    }
-    return out.toString();
   }
 
   /**
